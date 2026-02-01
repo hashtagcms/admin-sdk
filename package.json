@@ -1,6 +1,6 @@
 {
   "name": "@hashtagcms/admin-sdk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Core Logic SDK for HashtagCMS Admin Panel",
   "main": "dist/index.js",
   "scripts": {
@@ -15,6 +15,9 @@
   },
   "author": "HashtagCMS",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "axios": "^1.8.0",
     "secure-ls": "^2.0.0"
