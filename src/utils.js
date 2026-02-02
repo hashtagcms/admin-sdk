@@ -144,3 +144,27 @@ export function IsJson(str) {
   }
   return true;
 }
+
+/**
+ * Humanize string
+ */
+export function Humanize(value) {
+  if (!value) return "";
+  value = value.toString().replace(/_/g, " ");
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+/**
+ * Clean string for URL
+ */
+export function CleanForUrl(str, replaceWith = "-") {
+  return str.replace(/\s|'/g, replaceWith);
+}
+
+/**
+ * Title Case string
+ */
+export function TitleCase(value) {
+  value = value.replace(/\.|_/g, " ");
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}

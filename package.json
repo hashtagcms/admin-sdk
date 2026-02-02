@@ -1,13 +1,12 @@
 {
   "name": "@hashtagcms/admin-sdk",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Core Logic SDK for HashtagCMS Admin Panel",
   "main": "dist/index.js",
   "scripts": {
     "test": "jest",
-    "dev": "webpack --mode development --progress --color",
-    "prod": "webpack --mode production --progress --color",
-    "build": "npm run prod",
+    "dev": "webpack --mode development --progress --color",    
+    "build": "webpack --mode production --progress --color",
     "watch": "webpack --mode development --watch --progress --color"
   },
   "jest": {

@@ -24,3 +24,4 @@ export class Storage {
     return delete this.obj[name];
   }
 }
+export const Store = new Storage();
