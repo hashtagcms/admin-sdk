@@ -1,6 +1,62 @@
 const CLIPBOARD_KEY = "htcms_cps";
 
 /**
+ * Safely parse a prop value that may be a JSON string, undefined, null, or empty.
+ * This utility reduces boilerplate in Vue component data() functions.
+ * 
+ * @param {*} prop - The prop value to parse (can be string, object, undefined, null, '')
+ * @param {*} [defaultValue=null] - Default value if prop is undefined, null, empty, or parsing fails
+ * @returns {*} Parsed value or default value
+ * @example
+ * // In Vue component data()
+ * data() {
+ *   return {
+ *     sites: parseProp(this.dataSites, []),
+ *     config: parseProp(this.dataConfig, {})
+ *   }
+ * }
+ */
+export function parseProp(prop, defaultValue = null) {
+    if (prop === undefined || prop === null || prop === '') {
+        return defaultValue;
+    }
+    if (typeof prop === 'object') {
+        return prop;
+    }
+    try {
+        return JSON.parse(prop);
+    } catch (e) {
+        console.warn('HashtagCms: Failed to parse prop:', e.message);
+        return defaultValue;
+    }
+}
+
+/**
+ * Safely extract error data from an Axios error response.
+ * Handles cases where error.response is undefined (network errors, timeouts, CORS).
+ * 
+ * @param {Error} error - The error object from Axios catch block
+ * @param {Object} [defaults={}] - Additional default properties to include
+ * @returns {Object} Error data object with at least a 'message' property
+ * @example
+ * axios.get(url)
+ *   .then(res => ...)
+ *   .catch(error => {
+ *     const errorData = safeErrorData(error);
+ *     console.log(errorData.message);
+ *   });
+ */
+export function safeErrorData(error, defaults = {}) {
+    if (error.response?.data) {
+        return { ...defaults, ...error.response.data };
+    }
+    return {
+        message: error.message || 'An unexpected error occurred',
+        ...defaults
+    };
+}
+
+/**
  * queryBuilder
  * Get Param from query
  */

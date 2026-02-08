@@ -1,12 +1,60 @@
-export { AdminConfig } from './admin-config';
-export { Fetcher } from './fetcher';
-export { default as Form, Errors } from './form';
-export { default as MapAPI } from './map';
-export { Dashboard } from './dashboard';
-export { LeftMenu } from './left-menu';
-export { Storage, Store } from './storage';
-export { queryBuilder, Utils, CopyToClipboard, PasteFromClipboard, IsJson, Humanize, CleanForUrl, TitleCase } from './utils';
+import { AdminConfig } from './admin-config';
+import { Fetcher } from './fetcher';
+import Form, { Errors } from './form';
+import MapAPI from './map';
+import { Dashboard } from './dashboard';
+import { LeftMenu } from './left-menu';
+import { Storage, Store } from './storage';
+import { queryBuilder, Utils, CopyToClipboard, PasteFromClipboard, IsJson, Humanize, CleanForUrl, TitleCase, parseProp, safeErrorData } from './utils';
 
-// Default export if needed
-import adminConfig from './admin-config';
-export default adminConfig;
+// Export individual modules
+export {
+    AdminConfig,
+    Fetcher,
+    Form,
+    Errors,
+    MapAPI,
+    Dashboard,
+    LeftMenu,
+    Storage,
+    Store,
+    queryBuilder,
+    Utils,
+    CopyToClipboard,
+    PasteFromClipboard,
+    IsJson,
+    Humanize,
+    CleanForUrl,
+    TitleCase,
+    parseProp,
+    safeErrorData
+};
+
+const HashtagCmsAdmin = {
+    AdminConfig,
+    Fetcher,
+    Form,
+    Errors,
+    MapAPI,
+    Dashboard,
+    LeftMenu,
+    Storage,
+    Store,
+    queryBuilder,
+    Utils,
+    CopyToClipboard,
+    PasteFromClipboard,
+    IsJson,
+    Humanize,
+    CleanForUrl,
+    TitleCase,
+    parseProp,
+    safeErrorData
+};
+
+// Global exposure for browser/UMD
+if (typeof window !== 'undefined') {
+    window.HashtagCmsAdmin = HashtagCmsAdmin;
+}
+
+export default HashtagCmsAdmin;

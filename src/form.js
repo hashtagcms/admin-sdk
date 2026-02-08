@@ -155,8 +155,9 @@ export default class Form {
           this.onSuccess(response.data, resetAfterSubmit);
         })
         .catch((error) => {
-          this.onFail(error.response.data);
-          reject(error.response.data);
+          const errorData = error.response ? error.response.data : { message: error.message };
+          this.onFail(errorData);
+          reject(errorData);
         });
     });
   }

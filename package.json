@@ -1,8 +1,27 @@
 {
   "name": "@hashtagcms/admin-sdk",
-  "version": "1.0.2",
-  "description": "Core Logic SDK for HashtagCMS Admin Panel",
+  "version": "1.0.3",
+  "description": "Core Logic SDK for HashtagCms Admin Panel",
   "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "browser": "dist/index.umd.js",
+  "author": {
+    "name": "HashtagCms",
+    "url": "https://github.com/hashtagcms"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hashtagcms/admin-sdk.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hashtagcms/admin-sdk/issues"
+  },
+  "homepage": "https://github.com/hashtagcms/admin-sdk#readme",
+  "files": [
+    "src",
+    "dist",
+    "docs"
+  ],
   "scripts": {
     "test": "jest",
     "dev": "webpack --mode development --progress --color",    
@@ -12,7 +31,6 @@
   "jest": {
     "testEnvironment": "jsdom"
   },
-  "author": "HashtagCMS",
   "license": "MIT",
   "publishConfig": {
     "access": "public"

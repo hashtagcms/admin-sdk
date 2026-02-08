@@ -70,15 +70,20 @@ export const Dashboard = {
       },
     });
   },
-  makeData: function () {
-    this.labelsCategories = [];
-    this.datasCategories = [];
-    if (this.data && this.data.categories) {
-       for (let i = 0, len = this.data.categories.length; i < len; i++) {
-        this.labelsCategories.push(this.data.categories[i].link_rewrite);
-        this.datasCategories.push(this.data.categories[i].read_count);
+  makeChartData: function (items) {
+    let labels = [];
+    let datas = [];
+    if (items && Array.isArray(items)) {
+       for (let i = 0, len = items.length; i < len; i++) {
+        let label = items[i].link_rewrite;
+        if (label === '/' || label === '' || label === null) {
+            label = 'Home (/)';
+        }
+        labels.push(label);
+        datas.push(items[i].read_count);
       }
     }
+    return { labels, datas };
   },
   /**
    * Initialize Dashboard Charts
@@ -92,26 +97,27 @@ export const Dashboard = {
     };
     const options = { ...defaults, ...config };
 
-    this.data = data;
-    this.makeData();
-    
-    if (this.labelsCategories.length > 0) {
+    if (!data) return;
+
+    // 1. Process Categories
+    const categories = this.makeChartData(data.categories);
+    if (categories.labels.length > 0) {
         this.createChart(
           options.topCategoriesId,
-          this.labelsCategories,
-          this.datasCategories,
+          categories.labels,
+          categories.datas,
           this.bgColors,
           this.borderColors,
         );
     }
     
-    // Assuming labelsContent/datasContent might be populated elsewhere or needs similar logic to makeData
-    // For now keeping existing logic for topContents
-    if (this.labelsContent.length > 0) {
+    // 2. Process Pages
+    const pages = this.makeChartData(data.pages);
+    if (pages.labels.length > 0) {
         this.createChart(
           options.topContentsId,
-          this.labelsContent,
-          this.datasContent,
+          pages.labels,
+          pages.datas,
           [...this.bgColors].reverse(),
           [...this.borderColors].reverse(),
         );
