@@ -11,20 +11,20 @@ const CLIPBOARD_KEY = "htcms_cps";
  * // In Vue component data()
  * data() {
  *   return {
- *     sites: parseProp(this.dataSites, []),
- *     config: parseProp(this.dataConfig, {})
+ *     sites: SafeJsonParse(this.dataSites, []),
+ *     config: SafeJsonParse(this.dataConfig, {})
  *   }
  * }
  */
-export function parseProp(prop, defaultValue = null) {
-    if (prop === undefined || prop === null || prop === '') {
+export function SafeJsonParse(prop, defaultValue = null) {
+    if (prop === undefined || prop === null || prop === '' || prop.toString() === 'null') {
         return defaultValue;
     }
     if (typeof prop === 'object') {
         return prop;
     }
     try {
-        return JSON.parse(prop);
+        return typeof prop === 'string' ? JSON.parse(prop) : prop;
     } catch (e) {
         console.warn('HashtagCms: Failed to parse prop:', e.message);
         return defaultValue;
@@ -42,11 +42,11 @@ export function parseProp(prop, defaultValue = null) {
  * axios.get(url)
  *   .then(res => ...)
  *   .catch(error => {
- *     const errorData = safeErrorData(error);
+ *     const errorData = SafeErrorData(error);
  *     console.log(errorData.message);
  *   });
  */
-export function safeErrorData(error, defaults = {}) {
+export function SafeErrorData(error, defaults = {}) {
     if (error.response?.data) {
         return { ...defaults, ...error.response.data };
     }
@@ -57,10 +57,10 @@ export function safeErrorData(error, defaults = {}) {
 }
 
 /**
- * queryBuilder
+ * QueryBuilder
  * Get Param from query
  */
-export class queryBuilder {
+export class QueryBuilder {
   static get cache() {
     return {};
   }
@@ -147,19 +147,31 @@ export class Utils {
  * Copy to clipboard
  */
 export function CopyToClipboard(text) {
-  if (typeof navigator !== 'undefined' && navigator.clipboard) {
-    navigator.clipboard.writeText(text);
-  } else if (typeof window !== 'undefined') {
-    window.localStorage.setItem(CLIPBOARD_KEY, text);
-    const el = document.createElement("textarea");
-    el.value = text;
-    el.style.position = "absolute";
-    el.style.left = "-99999px";
-    el.style.top = "-99999px";
-    document.body.appendChild(el);
-    el.select();
-    document.execCommand("copy");
-    document.body.removeChild(el);
+  try {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+    } 
+    
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(CLIPBOARD_KEY, text);
+      
+      // Fallback for browsers that don't support navigator.clipboard but support execCommand
+      if (!navigator.clipboard) {
+          const el = document.createElement("textarea");
+          el.value = text;
+          el.style.position = "absolute";
+          el.style.left = "-99999px";
+          el.style.top = "-99999px";
+          document.body.appendChild(el);
+          el.select();
+          document.execCommand("copy");
+          document.body.removeChild(el);
+      }
+    }
+    return true;
+  } catch (e) {
+    console.error("HashtagCms: Copy failed", e);
+    return false;
   }
 }
 
@@ -168,22 +180,47 @@ export function CopyToClipboard(text) {
  */
 export async function PasteFromClipboard() {
   try {
-    if (typeof navigator === 'undefined') throw new Error("Navigator not available");
-    
-    const permission = await navigator.permissions.query({
-      name: "clipboard-read",
-    });
-    if (permission.state === "denied") {
-      throw new Error("Not allowed to read clipboard.");
+    if (typeof navigator === "undefined")
+      throw new Error("Navigator not available");
+
+    // Some browsers (like Safari/Firefox) may not support permission query for clipboard-read
+    // or may require a secure context (HTTPS/localhost)
+    if (navigator.clipboard && typeof navigator.clipboard.readText === "function") {
+        try {
+            // Attempt to read directly - browser will manage permissions/prompts
+            return await navigator.clipboard.readText();
+        } catch (e) {
+            console.warn("HashtagCms: Native clipboard read failed, trying permission query...", e.message);
+        }
     }
-    return navigator.clipboard.read();
+
+    // Permission API fallback check
+    if (navigator.permissions && typeof navigator.permissions.query === "function") {
+        try {
+            const permission = await navigator.permissions.query({ name: "clipboard-read" });
+            if (permission.state === "denied") {
+                throw new Error("Permission denied");
+            }
+        } catch (e) {
+            // Permission API query might fail (e.g. name not supported), we'll ignore and try fallback
+        }
+    }
+
+    // Attempt native read again if possible, or move to storage fallback
+    if (navigator.clipboard) {
+        return await navigator.clipboard.readText();
+    }
+    
+    throw new Error("Native Clipboard API unavailable");
+
   } catch (error) {
+    // Final fallback to localStorage if defined
     return new Promise((resolve, reject) => {
-      if (typeof window !== 'undefined' && window.localStorage.getItem(CLIPBOARD_KEY)) {
-        let data = window.localStorage.getItem(CLIPBOARD_KEY);
+      const data = typeof window !== "undefined" ? window.localStorage.getItem(CLIPBOARD_KEY) : null;
+      if (data) {
         resolve(data);
       } else {
-        reject(null);
+        reject(new Error("No data found in clipboard or storage"));
       }
     });
   }

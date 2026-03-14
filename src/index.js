@@ -5,7 +5,7 @@ import MapAPI from './map';
 import { Dashboard } from './dashboard';
 import { LeftMenu } from './left-menu';
 import { Storage, Store } from './storage';
-import { queryBuilder, Utils, CopyToClipboard, PasteFromClipboard, IsJson, Humanize, CleanForUrl, TitleCase, parseProp, safeErrorData } from './utils';
+import { QueryBuilder, Utils, CopyToClipboard, PasteFromClipboard, IsJson, Humanize, CleanForUrl, TitleCase, SafeJsonParse, SafeErrorData } from './utils';
 
 // Export individual modules
 export {
@@ -18,7 +18,7 @@ export {
     LeftMenu,
     Storage,
     Store,
-    queryBuilder,
+    QueryBuilder,
     Utils,
     CopyToClipboard,
     PasteFromClipboard,
@@ -26,8 +26,8 @@ export {
     Humanize,
     CleanForUrl,
     TitleCase,
-    parseProp,
-    safeErrorData
+    SafeJsonParse,
+    SafeErrorData
 };
 
 const HashtagCmsAdmin = {
@@ -40,7 +40,7 @@ const HashtagCmsAdmin = {
     LeftMenu,
     Storage,
     Store,
-    queryBuilder,
+    QueryBuilder,
     Utils,
     CopyToClipboard,
     PasteFromClipboard,
@@ -48,8 +48,8 @@ const HashtagCmsAdmin = {
     Humanize,
     CleanForUrl,
     TitleCase,
-    parseProp,
-    safeErrorData
+    SafeJsonParse,
+    SafeErrorData
 };
 
 // Global exposure for browser/UMD

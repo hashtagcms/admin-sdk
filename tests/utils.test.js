@@ -1,4 +1,4 @@
-import { Utils, IsJson, CopyToClipboard, queryBuilder } from '../src/utils';
+import { Utils, IsJson, CopyToClipboard, QueryBuilder, SafeJsonParse, SafeErrorData } from '../src/utils';
 
 describe('Utils Class', () => {
     let mockForm;
@@ -71,18 +71,56 @@ describe('IsJson Helper', () => {
     });
 });
 
-describe('queryBuilder Helper', () => {
+describe('SafeJsonParse Helper', () => {
+    it('parses valid JSON string', () => {
+        expect(SafeJsonParse('{"a":1}', {})).toEqual({a:1});
+    });
+
+    it('returns default value for invalid JSON', () => {
+        expect(SafeJsonParse('invalid', {def: true})).toEqual({def: true});
+    });
+
+    it('returns default value for null/undefined/empty', () => {
+        expect(SafeJsonParse(null, [])).toEqual([]);
+        expect(SafeJsonParse(undefined, [])).toEqual([]);
+        expect(SafeJsonParse('', [])).toEqual([]);
+        expect(SafeJsonParse('null', [])).toEqual([]);
+    });
+
+    it('returns the object if input is already an object', () => {
+        const obj = { x: 1 };
+        expect(SafeJsonParse(obj)).toBe(obj);
+    });
+});
+
+describe('SafeErrorData Helper', () => {
+    it('extracts data from axios error response', () => {
+        const error = {
+            response: {
+                data: { message: 'Server Error', code: 500 }
+            }
+        };
+        expect(SafeErrorData(error)).toEqual({ message: 'Server Error', code: 500 });
+    });
+
+    it('returns generic message for network error', () => {
+        const error = new Error('Network Error');
+        expect(SafeErrorData(error)).toEqual({ message: 'Network Error' });
+    });
+
+    it('merges with default values', () => {
+        const error = { response: { data: { message: 'Fail' } } };
+        expect(SafeErrorData(error, { custom: true })).toEqual({ message: 'Fail', custom: true });
+    });
+});
+
+describe('QueryBuilder Helper', () => {
     beforeAll(() => {
-        Object.defineProperty(window, 'location', {
-            value: {
-                search: '?id=123&name=john&category=admin'
-            },
-            writable: true
-        });
+        window.history.pushState({}, 'Test', '?id=123&name=john&category=admin');
     });
 
     it('parses current window location query params', () => {
-        const result = queryBuilder.all();
+        const result = QueryBuilder.all();
         expect(result).toEqual({
             id: '123',
             name: 'john',
@@ -91,14 +129,14 @@ describe('queryBuilder Helper', () => {
     });
 
     it('gets specific parameter', () => {
-        expect(queryBuilder.get('id')).toBe('123');
-        expect(queryBuilder.get('name')).toBe('john');
+        expect(QueryBuilder.get('id')).toBe('123');
+        expect(QueryBuilder.get('name')).toBe('john');
     });
 
     it('handles custom query string input', () => {
         const customQuery = 'foo=bar&baz=qux';
-        expect(queryBuilder.get('foo', customQuery)).toBe('bar');
-        expect(queryBuilder.all(customQuery)).toEqual({
+        expect(QueryBuilder.get('foo', customQuery)).toBe('bar');
+        expect(QueryBuilder.all(customQuery)).toEqual({
             foo: 'bar',
             baz: 'qux'
         });

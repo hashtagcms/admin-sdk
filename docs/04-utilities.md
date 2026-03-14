@@ -6,19 +6,19 @@ A collection of pure utility functions for data parsing, string manipulation, an
 
 ## 📋 Data Parsing
 
-### `parseProp`
+### `SafeJsonParse`
 Safely parses props that might be JSON strings or already objects.
 ```javascript
-import { parseProp } from '@hashtagcms/admin-sdk';
-const items = parseProp(this.sitesProp, []);
+import { SafeJsonParse } from '@hashtagcms/admin-sdk';
+const items = SafeJsonParse(this.sitesProp, []);
 ```
 
-### `safeErrorData`
-Extracts error messages from Axios responses safely.
+### `SafeErrorData`
+Extracters error messages from Axios responses safely.
 ```javascript
-import { safeErrorData } from '@hashtagcms/admin-sdk';
+import { SafeErrorData } from '@hashtagcms/admin-sdk';
 fetcher.get('/url').catch(err => {
-    const data = safeErrorData(err);
+    const data = SafeErrorData(err);
     alert(data.message);
 });
 ```
@@ -27,12 +27,12 @@ fetcher.get('/url').catch(err => {
 
 ## 🔗 URL & Clipboard
 
-### `queryBuilder`
+### `QueryBuilder`
 Access URL query parameters.
 ```javascript
-import { queryBuilder } from '@hashtagcms/admin-sdk';
-const id = queryBuilder.get('id');
-const allParams = queryBuilder.all();
+import { QueryBuilder } from '@hashtagcms/admin-sdk';
+const id = QueryBuilder.get('id');
+const allParams = QueryBuilder.all();
 ```
 
 ### Clipboard

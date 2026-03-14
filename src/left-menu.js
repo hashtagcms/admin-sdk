@@ -16,18 +16,42 @@ export class LeftMenu {
         hiddenCss: ['hidden-md', 'hidden-xs']
     }, config);
     this.visible = true;
+    this.collapsed = false;
+    this.storageKey = 'htcms_sidebar_collapsed';
     
-    // Check initial state
+    // Check stored state
+    if (typeof localStorage !== 'undefined') {
+        const stored = localStorage.getItem(this.storageKey);
+        if (stored !== null) {
+            this.collapsed = JSON.parse(stored);
+        }
+    }
+    
+    // Check initial state from DOM (overrides storage if forced in Blade/HTML)
     if (typeof document !== 'undefined') {
         const leftElem = document.querySelector(this.config.leftPanelSelector);
         if (leftElem) {
             const display = leftElem.style.display;
-            if (display === "" || display === "inline-block") {
-              this.emit("left-menu-on-show");
-              this.visible = true;
-            } else {
-              this.emit("left-menu-on-hide");
+            if (display === "none") {
               this.visible = false;
+              this.emit("left-menu-on-hide");
+            } else {
+               this.visible = true;
+               this.emit("left-menu-on-show");
+               
+               // Apply stored state to DOM
+               if (this.collapsed) {
+                   leftElem.classList.add('is-collapsed');
+                   this.emit("left-menu-on-collapse");
+               } else {
+                   leftElem.classList.remove('is-collapsed');
+                   this.emit("left-menu-on-expand");
+               }
+
+               // Final check if DOM has it forced
+               if (leftElem.classList.contains('is-collapsed')) {
+                   this.collapsed = true;
+               }
             }
         }
     }
@@ -43,20 +67,39 @@ export class LeftMenu {
     return this.visible;
   }
 
+  static isCollapsed() {
+      return this.collapsed;
+  }
+
+  static toggleCollapse(collapsed) {
+      if (typeof document === 'undefined') return;
+      let leftElem = document.querySelector(this.config.leftPanelSelector);
+      if (!leftElem) return;
+
+      this.collapsed = (collapsed !== undefined) ? collapsed : !this.collapsed;
+      
+      // Persist state
+      if (typeof localStorage !== 'undefined') {
+          localStorage.setItem(this.storageKey, JSON.stringify(this.collapsed));
+      }
+
+      if (this.collapsed) {
+          leftElem.classList.add('is-collapsed');
+          this.emit("left-menu-on-collapse");
+      } else {
+          leftElem.classList.remove('is-collapsed');
+          this.emit("left-menu-on-expand");
+      }
+      return this.collapsed;
+  }
+
   static toggleShow(show) {
     if (typeof document === 'undefined') return;
 
     let leftElem = document.querySelector(this.config.leftPanelSelector);
-    // Right elem selector provided in config but not used in original logic, keeping for future/ref
-    // let rightElem = document.querySelector(this.config.rightPanelSelector); 
-
     if (!leftElem) return;
 
-    let display = leftElem.style.display;
-    let width = leftElem.clientWidth;
-
-    //if it's visible then hide it.
-    if ((display === "" || display === "inline-block") && width !== 0) {
+    if (show === false || (show === undefined && this.visible)) {
       this.visible = false;
       leftElem.style.display = "none";
       this.emit("left-menu-on-hide");
